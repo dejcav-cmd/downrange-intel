@@ -224,7 +224,7 @@ function MondayBriefEmail({data,niche,active}){
       {/* Header */}
       <div style={{backgroundColor:C.s1,borderBottom:`1px solid ${C.border}`,padding:'14px 22px 12px'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:8}}>
-          <div><div style={{fontSize:11,color:C.muted,marginBottom:3}}><strong style={{color:C.mid}}>From: </strong>DownRange Intel &lt;intel@downrangeintel.com&gt;</div><div style={{fontSize:13,fontWeight:700,color:C.text}}>🎯 Monday Brief — {data.niche||niche}</div></div>
+          <div><div style={{fontSize:11,color:C.muted,marginBottom:3}}><strong style={{color:C.mid}}>From: </strong>DownRange Co. Intelligence &lt;intel@downrangeco.com&gt;</div><div style={{fontSize:13,fontWeight:700,color:C.text}}>🎯 Monday Brief — {data.niche||niche}</div></div>
           <div style={{textAlign:'right'}}><div style={{fontSize:10,color:C.muted,fontFamily:'monospace'}}>{new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})}</div><div style={{fontSize:10,color:C.muted}}>7:00 AM</div></div>
         </div>
       </div>
@@ -476,9 +476,9 @@ export default function Home(){
   return(
     <>
       <Head>
-        <title>DownRange Intel — YouTube Intelligence for Outdoor & Firearms Creators</title>
+        <title>DownRange Co. Intelligence Data — YouTube Intel for Outdoor & Firearms Creators</title>
         <meta name="description" content="Weekly Monday Brief for outdoor creators: script hook, thumbnail blueprint, 4-week calendar, competitor pulse, Shorts ideas, and seasonal alerts. intel.downrangeco.com"/>
-        <meta property="og:title" content="DownRange Intel — YouTube Intelligence for Outdoor Creators"/>
+        <meta property="og:title" content="DownRange Co. Intelligence Data — YouTube Intel for Outdoor Creators"/>
         <meta property="og:description" content="The Monday Brief for firearms, hunting, and outdoor YouTube creators."/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='none' stroke='%23C8922A' stroke-width='8'/><line x1='50' y1='10' x2='50' y2='40' stroke='%23C8922A' stroke-width='4'/><line x1='50' y1='60' x2='50' y2='90' stroke='%23C8922A' stroke-width='4'/><line x1='10' y1='50' x2='40' y2='50' stroke='%23C8922A' stroke-width='4'/><line x1='60' y1='50' x2='90' y2='50' stroke='%23C8922A' stroke-width='4'/></svg>"/>
@@ -523,7 +523,7 @@ export default function Home(){
           <div ref={heroRef} style={{maxWidth:900,margin:'0 auto',padding:'100px 24px 80px',textAlign:'center',position:'relative',zIndex:1,...anim(heroV)}}>
             <div style={{display:'inline-flex',alignItems:'center',gap:8,fontSize:11,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.gold,backgroundColor:C.goldDim,border:`1px solid ${C.goldBorder}`,padding:'6px 14px',borderRadius:4,marginBottom:30}}>
               <Dot color={C.green} size={6} pulse/>
-              {count} outdoor creators requested early access · Preview launching soon
+              {count} outdoor creators on the early access list
             </div>
             <h1 style={{fontSize:'clamp(42px,7vw,72px)',fontWeight:900,letterSpacing:'-3px',lineHeight:0.98,marginBottom:26,color:C.text}}>
               YouTube intel<br/><span style={{color:C.gold,filter:`drop-shadow(0 0 30px ${C.goldGlow})`}}>built for your niche.</span>
@@ -557,15 +557,6 @@ export default function Home(){
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-
-        {/* CREATOR MARQUEE */}
-        <div style={{backgroundColor:C.s1,borderBottom:`1px solid ${C.border}`,padding:'16px 0',overflow:'hidden'}}>
-          <div style={{display:'flex',gap:12,whiteSpace:'nowrap',animation:'marquee 30s linear infinite'}}>
-            {[...['Firearms Instructors','Deer Hunters','CCW Instructors','Bowhunters','Long-Range Shooters','Waterfowl Hunters','Turkey Hunters','Survival Creators','Gear Reviewers','2A Advocates','FFL Dealers','Outdoor Guides','Fly Fishermen','Competitive Shooters','Bushcraft','Knife & EDC'],...['Firearms Instructors','Deer Hunters','CCW Instructors','Bowhunters','Long-Range Shooters','Waterfowl Hunters','Turkey Hunters','Survival Creators','Gear Reviewers','2A Advocates','FFL Dealers','Outdoor Guides','Fly Fishermen','Competitive Shooters','Bushcraft','Knife & EDC']].map((t,i)=>(
-              <div key={i} style={{flexShrink:0,fontSize:12,fontWeight:600,color:C.muted,backgroundColor:C.s2,border:`1px solid ${C.border}`,padding:'7px 16px',borderRadius:6}}>{t}</div>
-            ))}
           </div>
         </div>
 
@@ -733,7 +724,7 @@ export default function Home(){
               <div style={{fontSize:10,fontWeight:700,color:C.gold,letterSpacing:'0.14em',textTransform:'uppercase',marginBottom:14}}>FAQ</div>
               <h2 style={{fontSize:'clamp(24px,3.5vw,38px)',fontWeight:900,letterSpacing:'-1px'}}>Questions we get asked.</h2>
             </div>
-            {[["Is the data real or AI-generated?","The outlier detection uses real YouTube Data API — actual view counts, channel averages, timing patterns. Claude AI analyzes those patterns to write the insights, script hooks, and thumbnail blueprints. Real data. AI-assisted writing."],["Why only outdoor, firearms, and hunting creators?","Because generic tools fail at vertical niches. TubeLab doesn't know deer season drives your content calendar, or that CCW content gets age-gated differently. We built DownRange Intel knowing the rules of your specific game."],["How is the thumbnail blueprint actually useful?","The brief shows you a rendered, real-looking thumbnail mockup — not placeholder boxes. Split-screen format, color zones, text overlay position, and creator placement are all specified. Build it in Canva in about 8 minutes."],["How is this different from TubeLab?","TubeLab requires you to log in and browse 5M+ videos yourself. We deliver the brief to you. TubeLab has no outdoor niche knowledge. We do. Same price — but we do all the work."],["When does the preview launch?","Accepting preview requests now and launching in batches. Everyone on the list gets access before public launch with founding pricing locked in."]].map(([q,a],i)=>(
+            {[["Is the data real or AI-generated?","The outlier detection uses real YouTube Data API — actual view counts, channel averages, timing patterns. Our AI Intelligence Engine analyzes those patterns to write the insights, script hooks, and thumbnail blueprints. Real data. AI-assisted writing."],["Why only outdoor, firearms, and hunting creators?","Because generic tools fail at vertical niches. TubeLab doesn't know deer season drives your content calendar, or that CCW content gets age-gated differently. We built DownRange Intel knowing the rules of your specific game."],["How is the thumbnail blueprint actually useful?","The brief shows you a rendered, real-looking thumbnail mockup — not placeholder boxes. Split-screen format, color zones, text overlay position, and creator placement are all specified. Build it in Canva in about 8 minutes."],["How is this different from TubeLab?","TubeLab requires you to log in and browse 5M+ videos yourself. We deliver the brief to you. TubeLab has no outdoor niche knowledge. We do. Same price — but we do all the work."],["When does the preview launch?","Accepting preview requests now and launching in batches. Everyone on the list gets access before public launch with founding pricing locked in."]].map(([q,a],i)=>(
               <FaqItem key={q} q={q} a={a} visible={faqV} delay={i*.07}/>
             ))}
           </div>
@@ -768,9 +759,17 @@ export default function Home(){
         </div>
 
         <footer style={{padding:'28px 36px',display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12}}>
-          <div style={{display:'flex',alignItems:'center',gap:8,fontSize:13,fontWeight:800}}><Dot color={C.gold} size={6}/>DownRange<span style={{color:C.gold}}>Intel</span></div>
-          <div style={{fontSize:12,color:C.muted}}>intel.downrangeco.com · Part of DownRange Co.</div>
-          <div style={{fontSize:11,color:C.muted}}>© 2026 DownRange Co. · Washington State</div>
+          <img src='/logo-sm.png' alt='DownRange Co.' style={{height:28,width:'auto'}}/>
+          <div style={{fontSize:11,color:C.muted,textAlign:'center',lineHeight:1.8}}>
+            Part of <a href='https://downrangeco.com' target='_blank' rel='noopener' style={{color:C.gold,textDecoration:'none'}}>DownRange Co.</a> · 
+            <a href='https://downrangeco.com' target='_blank' rel='noopener' style={{color:C.mid,textDecoration:'none'}}>News Portal</a> · 
+            intel.downrangeco.com<br/>
+            Intelligence powered by multiple sources including the DownRange News Portal, YouTube Data API, and the DownRange Intelligence Engine.
+          </div>
+          <div style={{fontSize:11,color:C.muted,textAlign:'right'}}>
+            © 2026 DownRange Co. All rights reserved.<br/>
+            Content analysis for informational purposes only. Washington State.
+          </div>
         </footer>
       </div>
     </>
