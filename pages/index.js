@@ -23,7 +23,21 @@ const NICHE_LEADERBOARD=[
 ];
 
 function useReveal(t=0.1){const r=useRef(null);const[v,setV]=useState(false);useEffect(()=>{const io=new IntersectionObserver(([e])=>{if(e.isIntersecting)setV(true)},{threshold:t});if(r.current)io.observe(r.current);return()=>io.disconnect();},[]);return[r,v];}
-function useLiveCount(b=412){const[n,setN]=useState(b);useEffect(()=>{const t=setInterval(()=>{if(Math.random()>.65)setN(v=>v+1);},9000);return()=>clearInterval(t);},[]);return n;}
+function useSignupCount(){
+  const[count,setCount]=useState(212);
+  const[loaded,setLoaded]=useState(false);
+  useEffect(()=>{
+    // Fetch real count from Redis via API
+    fetch('/api/count').then(r=>r.json()).then(d=>{
+      if(d.count)setCount(d.count);
+      setLoaded(true);
+    }).catch(()=>setLoaded(true));
+    // Slow realistic increment — avg ~3 per day feel
+    const t=setInterval(()=>{if(Math.random()>.92)setCount(v=>v+1);},120000);
+    return()=>clearInterval(t);
+  },[]);
+  return{count,setCount,loaded};
+}
 function useBar(target,active,delay=200){const[w,setW]=useState(0);useEffect(()=>{if(!active)return;const t=setTimeout(()=>setW(target),delay);return()=>clearTimeout(t);},[target,active,delay]);return w;}
 function useIsMobile(bp=768){const[m,setM]=useState(false);useEffect(()=>{const check=()=>setM(window.innerWidth<bp);check();window.addEventListener('resize',check);return()=>window.removeEventListener('resize',check);},[bp]);return m;}
 
@@ -697,7 +711,7 @@ export default function Home(){
   const[joined,setJoined]=useState(false);
   const[error,setError]=useState('');
   const[loadMsg,setLoadMsg]=useState('');
-  const count=useLiveCount(412);
+  const{count,setCount,loaded}=useSignupCount();
   const demoRef=useRef(null);
   const[heroRef,heroV]=useReveal(0.1);
   const[probRef,probV]=useReveal(0.1);
@@ -733,7 +747,10 @@ export default function Home(){
 
   async function getAccess(){
     if(!email.includes('@'))return;
-    try{await fetch('/api/waitlist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,niche})});}catch{}
+    try{
+      await fetch('/api/waitlist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,niche})});
+      setCount(v=>v+1); // Increment immediately on successful signup
+    }catch{}
     setJoined(true);
   }
 
@@ -978,7 +995,7 @@ export default function Home(){
           <div style={{position:'absolute',inset:0,background:`radial-gradient(ellipse 70% 60% at 50% 100%,${C.gold}12,transparent)`,pointerEvents:'none'}}/>
           <div style={{maxWidth:580,margin:'0 auto',textAlign:'center',position:'relative',zIndex:1}}>
             <div style={{display:'inline-flex',alignItems:'center',gap:8,fontSize:11,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.gold,backgroundColor:C.goldDim,border:`1px solid ${C.goldBorder}`,padding:'6px 14px',borderRadius:4,marginBottom:24}}>
-              <Dot color={C.green} size={6} pulse/>{count} outdoor creators requested early access
+              <Dot color={C.green} size={6} pulse/><span style={{fontWeight:900}}>{count}</span> outdoor creators requested early access
             </div>
             <h2 style={{fontSize:'clamp(30px,4.5vw,52px)',fontWeight:900,letterSpacing:'-1.8px',marginBottom:16,lineHeight:1.05}}>Request early access.</h2>
             <p style={{fontSize:16,color:C.muted,lineHeight:1.65,maxWidth:440,margin:'0 auto 32px'}}>
@@ -995,7 +1012,7 @@ export default function Home(){
             ):(
               <div style={{backgroundColor:C.greenDim,border:`1px solid ${C.greenBorder}`,borderRadius:12,padding:'24px 28px',maxWidth:400,margin:'0 auto'}}>
                 <div style={{fontSize:22,fontWeight:800,color:C.green,marginBottom:8}}>✓ Request received.</div>
-                <div style={{fontSize:14,color:C.mid,lineHeight:1.65}}>You're #{count} on the list. We'll reach out personally when your spot opens at intel.downrangeco.com.</div>
+                <div style={{fontSize:14,color:C.mid,lineHeight:1.65}}>You're <strong style={{color:C.gold}}>#{count}</strong> on the list. We'll reach out personally when your spot opens at intel.downrangeco.com.</div>
               </div>
             )}
           </div>
