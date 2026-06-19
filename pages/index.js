@@ -786,10 +786,9 @@ export default function Home(){
 
         {/* NAV */}
         <nav style={{borderBottom:`1px solid ${C.border}`,padding:'15px 36px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,backgroundColor:`${C.bg}F4`,backdropFilter:'blur(16px)',zIndex:50}}>
-          <div style={{display:'flex',alignItems:'center',gap:6,fontSize:15,fontWeight:800,letterSpacing:'-0.3px'}}>
-            <Dot color={C.gold}/>DownRange<span style={{color:C.gold}}>Intel</span>
-            <span style={{fontSize:10,color:C.muted,fontWeight:400,marginLeft:4,letterSpacing:'0.02em'}}>intel.downrangeco.com</span>
-          </div>
+          <a href='/' style={{display:'flex',alignItems:'center',textDecoration:'none'}}>
+            <img src='/logo-sm.png' alt='DownRange Co. Intelligence Data' style={{height:36,width:'auto'}}/>
+          </a>
           <div style={{display:'flex',gap:32,fontSize:13,color:C.muted,letterSpacing:'0.01em'}}>
             {[['Demo','#demo'],['Compare','#compare'],['Pricing','#pricing']].map(([l,h])=>(
               <a key={l} href={h} style={{color:C.muted,textDecoration:'none'}} onMouseEnter={e=>e.target.style.color=C.text} onMouseLeave={e=>e.target.style.color=C.muted}>{l}</a>
