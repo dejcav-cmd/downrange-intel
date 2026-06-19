@@ -1,3 +1,5 @@
+const COUNTER_KEY = 'intel-signup-count'; // no colon — safer in Upstash REST URLs
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
   const { email, niche } = req.body;
@@ -6,26 +8,30 @@ export default async function handler(req, res) {
   const entry = { email, niche: niche || 'not specified', at: new Date().toISOString() };
   console.log('[WAITLIST] New signup:', entry);
 
-  // 1. Increment Redis counter
+  let newCount = null;
+
+  // 1. Increment Redis counter and get new value
   const { UPSTASH_REDIS_REST_URL: redisUrl, UPSTASH_REDIS_REST_TOKEN: redisToken } = process.env;
   if (redisUrl && redisToken) {
     try {
-      const r = await fetch(`${redisUrl}/incr/intel:signup_count`, {
-        headers: { Authorization: `Bearer ${redisToken}` }
+      const r = await fetch(`${redisUrl}/incr/${COUNTER_KEY}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${redisToken}`, 'Content-Type': 'application/json' },
       });
       const d = await r.json();
-      console.log('[WAITLIST] Counter incremented to:', d.result);
+      newCount = d.result ? parseInt(d.result) : null;
+      console.log('[WAITLIST] Redis counter now:', newCount);
     } catch (err) {
       console.error('[WAITLIST] Redis error:', err.message);
     }
   } else {
-    console.warn('[WAITLIST] No Redis env vars — counter not persisted');
+    console.warn('[WAITLIST] No Redis env vars set');
   }
 
   // 2. Send Resend notification
   const RESEND_KEY = process.env.RESEND_API_KEY;
   if (!RESEND_KEY) {
-    console.warn('[WAITLIST] RESEND_API_KEY not set — email not sent. Add it to Vercel env vars for downrange-intel project.');
+    console.warn('[WAITLIST] RESEND_API_KEY not set');
   } else {
     try {
       const emailRes = await fetch('https://api.resend.com/emails', {
@@ -42,25 +48,21 @@ export default async function handler(req, res) {
               <table style="width:100%;border-collapse:collapse">
                 <tr><td style="color:#52555C;padding:8px 0;font-size:13px;width:80px">Email</td><td style="color:#EDE8DF;font-size:13px;font-weight:700">${email}</td></tr>
                 <tr><td style="color:#52555C;padding:8px 0;font-size:13px">Niche</td><td style="color:#C8922A;font-size:13px">${niche || 'Not specified'}</td></tr>
+                <tr><td style="color:#52555C;padding:8px 0;font-size:13px">List #</td><td style="color:#22C55E;font-size:13px;font-weight:700">${newCount ? 212 + newCount : '—'}</td></tr>
                 <tr><td style="color:#52555C;padding:8px 0;font-size:13px">Time</td><td style="color:#EDE8DF;font-size:13px">${new Date().toLocaleString('en-US',{timeZone:'America/Los_Angeles',dateStyle:'full',timeStyle:'short'})}</td></tr>
               </table>
-              <div style="margin-top:24px;padding:16px;background:#0C0E11;border-radius:8px;border:1px solid #1C1F24">
-                <div style="font-size:11px;color:#52555C;margin-bottom:8px">Reply to this email to respond directly to ${email}</div>
-              </div>
               <div style="margin-top:20px;font-size:11px;color:#52555C">intel.downrangeco.com · DownRange Co.</div>
             </div>`,
         }),
       });
       const emailData = await emailRes.json();
-      if (emailData.error) {
-        console.error('[WAITLIST] Resend error:', JSON.stringify(emailData.error));
-      } else {
-        console.log('[WAITLIST] Email sent, id:', emailData.id);
-      }
+      if (emailData.error) console.error('[WAITLIST] Resend error:', JSON.stringify(emailData.error));
+      else console.log('[WAITLIST] Email sent:', emailData.id);
     } catch (err) {
       console.error('[WAITLIST] Resend exception:', err.message);
     }
   }
 
-  res.status(200).json({ ok: true });
+  // Return the confirmed count so the frontend can update immediately
+  res.status(200).json({ ok: true, newCount });
 }

@@ -26,15 +26,17 @@ function useReveal(t=0.1){const r=useRef(null);const[v,setV]=useState(false);use
 function useSignupCount(){
   const[count,setCount]=useState(212);
   const[loaded,setLoaded]=useState(false);
-  useEffect(()=>{
-    // Fetch real count from Redis via API
+  function fetchCount(){
     fetch('/api/count').then(r=>r.json()).then(d=>{
-      if(d.count)setCount(d.count);
+      if(d.count&&d.count>=212)setCount(d.count);
       setLoaded(true);
     }).catch(()=>setLoaded(true));
-    // Slow realistic increment — avg ~3 per day feel
-    const t=setInterval(()=>{if(Math.random()>.92)setCount(v=>v+1);},120000);
-    return()=>clearInterval(t);
+  }
+  useEffect(()=>{
+    fetchCount();
+    // Refetch every 60s to stay in sync across tabs/sessions
+    const sync=setInterval(fetchCount,60000);
+    return()=>clearInterval(sync);
   },[]);
   return{count,setCount,loaded};
 }
@@ -748,9 +750,12 @@ export default function Home(){
   async function getAccess(){
     if(!email.includes('@'))return;
     try{
-      await fetch('/api/waitlist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,niche})});
-      setCount(v=>v+1); // Increment immediately on successful signup
-    }catch{}
+      const r=await fetch('/api/waitlist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,niche})});
+      const d=await r.json();
+      // Use confirmed Redis count if available, otherwise local increment
+      if(d.newCount){setCount(212+d.newCount);}
+      else{setCount(v=>v+1);}
+    }catch{setCount(v=>v+1);}
     setJoined(true);
   }
 
