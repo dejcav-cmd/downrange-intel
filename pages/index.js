@@ -814,7 +814,7 @@ export default function Home(){
           <div ref={heroRef} style={{maxWidth:900,margin:'0 auto',padding:isMobile?'60px 20px 48px':'100px 24px 80px',textAlign:'center',position:'relative',zIndex:1,...anim(heroV)}}>
             <div style={{display:'inline-flex',alignItems:'center',gap:8,fontSize:11,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.gold,backgroundColor:C.goldDim,border:`1px solid ${C.goldBorder}`,padding:'6px 14px',borderRadius:4,marginBottom:30}}>
               <Dot color={C.green} size={6} pulse/>
-              {count} outdoor creators on the early access list
+              <span style={{fontWeight:900}}>{count}</span> outdoor creators requested early access
             </div>
             <h1 style={{fontSize:'clamp(42px,7vw,72px)',fontWeight:900,letterSpacing:'-3px',lineHeight:0.98,marginBottom:26,color:C.text}}>
               YouTube intel<br/><span style={{color:C.gold,filter:`drop-shadow(0 0 30px ${C.goldGlow})`}}>built for your niche.</span>
