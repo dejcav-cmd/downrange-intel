@@ -25,9 +25,33 @@ const NICHE_LEADERBOARD=[
 function useReveal(t=0.1){const r=useRef(null);const[v,setV]=useState(false);useEffect(()=>{const io=new IntersectionObserver(([e])=>{if(e.isIntersecting)setV(true)},{threshold:t});if(r.current)io.observe(r.current);return()=>io.disconnect();},[]);return[r,v];}
 function useLiveCount(b=412){const[n,setN]=useState(b);useEffect(()=>{const t=setInterval(()=>{if(Math.random()>.65)setN(v=>v+1);},9000);return()=>clearInterval(t);},[]);return n;}
 function useBar(target,active,delay=200){const[w,setW]=useState(0);useEffect(()=>{if(!active)return;const t=setTimeout(()=>setW(target),delay);return()=>clearTimeout(t);},[target,active,delay]);return w;}
+function useIsMobile(bp=768){const[m,setM]=useState(false);useEffect(()=>{const check=()=>setM(window.innerWidth<bp);check();window.addEventListener('resize',check);return()=>window.removeEventListener('resize',check);},[bp]);return m;}
 
 function Dot({color=C.green,pulse=false,size=7}){return<div style={{width:size,height:size,borderRadius:'50%',backgroundColor:color,boxShadow:`0 0 ${size+2}px ${color}`,flexShrink:0,animation:pulse?'pulse 2s ease infinite':'none'}}/>;}
 function ConfBar({value,color=C.gold,active,delay=200}){const w=useBar(value,active,delay);return<div style={{height:3,backgroundColor:C.s4,borderRadius:2,overflow:'hidden'}}><div style={{height:'100%',backgroundColor:color,width:`${w}%`,borderRadius:2,transition:'width 1.1s cubic-bezier(.34,1.2,.64,1)',boxShadow:`0 0 6px ${color}50`}}/></div>;}
+
+
+// ── MOBILE NAV ────────────────────────────────────────────────────
+function MobileNav({onCTA}){
+  const[open,setOpen]=useState(false);
+  const close=()=>setOpen(false);
+  return(
+    <nav style={{borderBottom:`1px solid ${C.border}`,padding:'12px 20px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,backgroundColor:`${C.bg}F4`,backdropFilter:'blur(16px)',zIndex:50}}>
+      <a href='/' style={{display:'flex',alignItems:'center',textDecoration:'none'}}><img src='/logo-sm.png' alt='DownRange Co.' style={{height:28,width:'auto'}}/></a>
+      <button onClick={()=>setOpen(o=>!o)} style={{background:'transparent',border:`1px solid ${C.border}`,borderRadius:7,padding:'7px 10px',cursor:'pointer',display:'flex',flexDirection:'column',gap:4,alignItems:'center',justifyContent:'center'}}>
+        {[0,1,2].map(i=><div key={i} style={{width:18,height:2,backgroundColor:C.mid,borderRadius:1,transition:'all .2s',transform:open&&i===0?'rotate(45deg) translate(4px,4px)':open&&i===2?'rotate(-45deg) translate(4px,-4px)':'none',opacity:open&&i===1?0:1}}/>)}
+      </button>
+      {open&&<div style={{position:'absolute',top:'100%',left:0,right:0,backgroundColor:C.s1,borderBottom:`1px solid ${C.border}`,padding:'16px 20px',display:'flex',flexDirection:'column',gap:0,zIndex:100}}>
+        {[['Demo','#demo'],['Compare','#compare'],['Pricing','#pricing']].map(([l,h])=>(
+          <a key={l} href={h} onClick={close} style={{color:C.mid,textDecoration:'none',fontSize:16,fontWeight:600,padding:'14px 0',borderBottom:`1px solid ${C.border}`}}>{l}</a>
+        ))}
+        <button onClick={()=>{close();onCTA();}} style={{marginTop:16,fontSize:14,fontWeight:700,color:'#000',backgroundColor:C.gold,padding:'14px 0',borderRadius:8,border:'none',cursor:'pointer',fontFamily:'inherit',width:'100%'}}>
+          Request Early Access →
+        </button>
+      </div>}
+    </nav>
+  );
+}
 
 // ── FLOATING HERO THUMBNAILS ──────────────────────────────────────
 const HERO_THUMBS=[
@@ -110,10 +134,11 @@ function RealThumbnail({concept,title}){
 
 // Annotations below thumbnail
 function ThumbnailAnnotations({concept}){
+  const isMobile=useIsMobile();
   if(!concept)return null;
   return(
     <div>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginTop:10}}>
+      <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(3,1fr)',gap:8,marginTop:10}}>
         {[['⬅ Left Panel',concept.leftSide,'Product / subject matter — establishes context at first glance'],['📝 Text Overlay',concept.textOverlay,'All-caps, high contrast — drives click urgency'],['➡ Right Panel',concept.rightSide,'Creator reaction — authentic emotion builds trust & curiosity']].map(([label,val,tip])=>(
           <div key={label} style={{backgroundColor:C.s2,border:`1px solid ${C.border}`,borderRadius:7,padding:'9px 11px'}}>
             <div style={{fontSize:9,fontWeight:700,color:C.gold,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>{label}</div>
@@ -135,6 +160,7 @@ function ThumbnailAnnotations({concept}){
 
 // ── ROI CALCULATOR ────────────────────────────────────────────────
 function ROICalculator(){
+  const isMobile=useIsMobile();
   const[hours,setHours]=useState(3);
   const[rate,setRate]=useState(50);
   const monthly=hours*4*rate;
@@ -148,7 +174,7 @@ function ROICalculator(){
           <h3 style={{fontSize:'clamp(20px,3vw,30px)',fontWeight:900,letterSpacing:'-0.8px',marginBottom:8}}>Is $29/month worth it?</h3>
           <p style={{fontSize:14,color:C.muted}}>Adjust the sliders to your situation and see the math.</p>
         </div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:28,marginBottom:28}}>
+        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:isMobile?20:28,marginBottom:28}}>
           {/* Slider 1 */}
           <div>
             <div style={{display:'flex',justifyContent:'space-between',marginBottom:10}}>
@@ -202,6 +228,7 @@ function ROICalculator(){
 
 // ── MONDAY BRIEF EMAIL ────────────────────────────────────────────
 function MondayBriefEmail({data,niche,active}){
+  const isMobile=useIsMobile();
   const[copied,setCopied]=useState(false);
   if(!data)return null;
   function copyHook(){if(data.nextVideo?.scriptHook){navigator.clipboard?.writeText(data.nextVideo.scriptHook).catch(()=>{});setCopied(true);setTimeout(()=>setCopied(false),2500);}}
@@ -241,7 +268,7 @@ function MondayBriefEmail({data,niche,active}){
         <div style={{backgroundColor:`${C.gold}0A`,border:`1px solid ${C.goldBorder}`,borderRadius:12,padding:'20px 20px',marginBottom:20}}>
           <SL icon="🎯" text="Your Video This Week"/>
           <div style={{fontSize:'clamp(15px,2.5vw,20px)',fontWeight:900,color:C.text,lineHeight:1.25,marginBottom:14,letterSpacing:'-0.5px'}}>"{data.nextVideo?.title}"</div>
-          <div style={{display:'flex',gap:10,flexWrap:'wrap',marginBottom:12}}>
+          <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}}>
             {[['Publish',data.nextVideo?.publishDay],['Length',data.nextVideo?.length],['Time',data.nextVideo?.publishTime],['Viral Score',`${data.nextVideo?.viralScore||86}/100`]].map(([l,v])=>(
               <div key={l} style={{backgroundColor:C.s3,border:`1px solid ${l==='Viral Score'?C.goldBorder:C.border}`,borderRadius:6,padding:'7px 12px',textAlign:'center'}}>
                 <div style={{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:2}}>{l}</div>
@@ -388,7 +415,7 @@ function MondayBriefEmail({data,niche,active}){
         {data.contentRepurposing&&(
           <div style={{marginBottom:20}}>
             <SL icon="♻️" text="Repurpose This Video"/>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+            <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:8}}>
               {/* Blog outline */}
               {data.contentRepurposing.blogOutline&&(
                 <div style={{backgroundColor:C.s2,border:`1px solid ${C.border}`,borderRadius:8,padding:'12px 14px'}}>
@@ -436,7 +463,7 @@ function MondayBriefEmail({data,niche,active}){
           <div style={{marginBottom:20}}>
             <SL icon="💰" text="Monetization Angle"/>
             <div style={{backgroundColor:`${C.green}08`,border:`1px solid ${C.greenBorder}`,borderRadius:9,padding:'14px 16px'}}>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:12}}>
+              <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'1fr 1fr',gap:12,marginBottom:12}}>
                 <div>
                   <div style={{fontSize:9,color:C.muted,textTransform:'uppercase',marginBottom:4}}>Best affiliate category</div>
                   <div style={{fontSize:13,fontWeight:700,color:C.text}}>{data.monetizationAngle.primaryProduct}</div>
@@ -479,6 +506,7 @@ function MondayBriefEmail({data,niche,active}){
 
 // ── COMPARISON ────────────────────────────────────────────────────
 function ComparisonSection(){
+  const isMobile=useIsMobile();
   const[sel,setSel]=useState('downrange');
   return(
     <div style={{backgroundColor:C.s1,borderTop:`1px solid ${C.border}`,borderBottom:`1px solid ${C.border}`,padding:'80px 24px'}} id="compare">
@@ -488,7 +516,7 @@ function ComparisonSection(){
           <h2 style={{fontSize:'clamp(26px,3.8vw,42px)',fontWeight:900,letterSpacing:'-1.2px',marginBottom:14}}>Same niche. Different experience.</h2>
           <p style={{fontSize:15,color:C.muted,maxWidth:500,margin:'0 auto',lineHeight:1.7}}>Type any niche — deer hunting, archery, CCW — into each tool. Here's exactly what you get back.</p>
         </div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:24}}>
+        <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(3,1fr)',gap:12,marginBottom:24}}>
           {[{id:'tubelab',hours:'3-4 hrs/week',label:'TubeLab',sub:'Browse 5M+ videos yourself',col:C.red},{id:'vidiq',hours:'1-2 hrs/week',label:'VidIQ',sub:'Review 50 daily idea cards',col:'#F59E0B'},{id:'downrange',hours:'0 hrs/week',label:'DownRange Intel',sub:'Brief arrives Monday 7am',col:C.green}].map(({id,hours,label,sub,col})=>(
             <button key={id} onClick={()=>setSel(id)} style={{backgroundColor:sel===id?C.s2:C.s1,border:`1px solid ${sel===id?(id==='downrange'?C.goldBorder:C.hi):C.border}`,borderRadius:10,padding:'14px 16px',cursor:'pointer',fontFamily:'inherit',textAlign:'center',transition:'all .15s'}}>
               <div style={{fontSize:10,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:4}}>{label}</div>
@@ -561,12 +589,13 @@ const TIERS=[
 ];
 
 function PricingTabs({onCTA}){
+  const isMobile=useIsMobile();
   const[tab,setTab]=useState('full');
   const tier=TIERS.find(t=>t.id===tab);
   const included=ALL_SECTIONS.filter(s=>s.in.includes(tab));
   const excluded=ALL_SECTIONS.filter(s=>!s.in.includes(tab));
   return(
-    <div style={{backgroundColor:C.s1,padding:'80px 24px',borderBottom:`1px solid ${C.border}`}} id="pricing">
+    <div style={{backgroundColor:C.s1,padding:isMobile?'48px 16px':'80px 24px',borderBottom:`1px solid ${C.border}`}} id="pricing">
       <div style={{maxWidth:900,margin:'0 auto'}}>
         {/* Header */}
         <div style={{textAlign:'center',marginBottom:40}}>
@@ -576,9 +605,9 @@ function PricingTabs({onCTA}){
         </div>
 
         {/* Tab buttons */}
-        <div style={{display:'flex',gap:10,justifyContent:'center',marginBottom:36,flexWrap:'wrap'}}>
+        <div style={{display:'flex',flexDirection:isMobile?'column':'row',gap:10,justifyContent:'center',marginBottom:36,width:isMobile?'100%':'auto'}}>
           {TIERS.map(t=>(
-            <button key={t.id} onClick={()=>setTab(t.id)} style={{fontFamily:'inherit',cursor:'pointer',borderRadius:10,padding:'14px 24px',border:`2px solid ${tab===t.id?t.color:C.border}`,backgroundColor:tab===t.id?`${t.color}12`:C.s2,transition:'all .18s',minWidth:160,textAlign:'center',position:'relative'}}>
+            <button key={t.id} onClick={()=>setTab(t.id)} style={{fontFamily:'inherit',cursor:'pointer',borderRadius:10,padding:'14px 24px',border:`2px solid ${tab===t.id?t.color:C.border}`,backgroundColor:tab===t.id?`${t.color}12`:C.s2,transition:'all .18s',minWidth:isMobile?'auto':160,width:isMobile?'100%':'auto',textAlign:'center',position:'relative'}}>
               {t.featured&&tab!==t.id&&<div style={{position:'absolute',top:-10,left:'50%',transform:'translateX(-50%)',backgroundColor:C.gold,color:'#000',fontSize:9,fontWeight:800,padding:'2px 10px',borderRadius:4,whiteSpace:'nowrap'}}>MOST VALUE</div>}
               <div style={{fontSize:13,fontWeight:700,color:tab===t.id?t.color:C.mid,marginBottom:4}}>{t.name}</div>
               <div style={{fontSize:24,fontWeight:900,color:tab===t.id?t.color:C.text,letterSpacing:'-1px',lineHeight:1}}>{t.price}<span style={{fontSize:12,fontWeight:500,color:C.muted}}>{t.period}</span></div>
@@ -590,7 +619,7 @@ function PricingTabs({onCTA}){
         {/* Selected tier detail */}
         <div style={{backgroundColor:C.s2,border:`2px solid ${tier.color}30`,borderRadius:14,overflow:'hidden'}}>
           {/* Tier header bar */}
-          <div style={{background:`linear-gradient(135deg,${tier.color}18,${tier.color}08)`,borderBottom:`1px solid ${tier.color}25`,padding:'24px 28px',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:16}}>
+          <div style={{background:`linear-gradient(135deg,${tier.color}18,${tier.color}08)`,borderBottom:`1px solid ${tier.color}25`,padding:isMobile?'20px 16px':'24px 28px',display:'flex',flexDirection:isMobile?'column':'row',alignItems:isMobile?'flex-start':'center',justifyContent:'space-between',gap:16}}>
             <div>
               <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:6}}>
                 <div style={{fontSize:22,fontWeight:900,color:tier.color,letterSpacing:'-1px'}}>{tier.price}<span style={{fontSize:13,fontWeight:500,color:C.muted}}>{tier.period}</span></div>
@@ -600,7 +629,7 @@ function PricingTabs({onCTA}){
               <div style={{fontSize:13,color:C.muted,maxWidth:440,lineHeight:1.6}}>{tier.tagline}</div>
             </div>
             <div style={{textAlign:'right'}}>
-              <button onClick={onCTA} style={{fontSize:13,fontWeight:700,color:tier.id==='full'?'#000':C.text,backgroundColor:tier.id==='full'?C.gold:tier.color,padding:'12px 24px',borderRadius:8,border:'none',cursor:'pointer',fontFamily:'inherit',display:'block',marginBottom:8,whiteSpace:'nowrap',boxShadow:tier.id==='full'?`0 4px 16px ${C.goldGlow}`:'none'}}>
+              <button onClick={onCTA} style={{fontSize:13,fontWeight:700,color:tier.id==='full'?'#000':C.text,backgroundColor:tier.id==='full'?C.gold:tier.color,padding:'12px 24px',borderRadius:8,border:'none',cursor:'pointer',fontFamily:'inherit',display:'block',marginBottom:8,whiteSpace:'nowrap',boxShadow:tier.id==='full'?`0 4px 16px ${C.goldGlow}`:'none',width:isMobile?'100%':'auto'}}>
                 Request Early Access →
               </button>
               <div style={{fontSize:11,color:C.muted}}>{tier.detail}</div>
@@ -612,7 +641,7 @@ function PricingTabs({onCTA}){
             <div style={{fontSize:11,fontWeight:700,color:C.green,textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:16,display:'flex',alignItems:'center',gap:8}}>
               <span>✓</span> What's included — {included.length} feature{included.length!==1?'s':''}
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:10,marginBottom:included.length&&excluded.length?28:0}}>
+            <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(auto-fill,minmax(260px,1fr))',gap:10,marginBottom:included.length&&excluded.length?28:0}}>
               {included.map(s=>(
                 <div key={s.name} style={{backgroundColor:C.s3,border:`1px solid ${C.border}`,borderRadius:9,padding:'12px 14px',display:'flex',gap:10,alignItems:'flex-start'}}>
                   <span style={{fontSize:18,flexShrink:0,marginTop:1}}>{s.icon}</span>
@@ -659,6 +688,7 @@ function PricingTabs({onCTA}){
 
 // ── MAIN ──────────────────────────────────────────────────────────
 export default function Home(){
+  const isMobile=useIsMobile();
   const[niche,setNiche]=useState('');
   const[loading,setLoading]=useState(false);
   const[briefData,setBriefData]=useState(null);
@@ -721,7 +751,7 @@ export default function Home(){
         <meta property="og:description" content="The Monday Brief for firearms, hunting, and outdoor YouTube creators."/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='none' stroke='%23C8922A' stroke-width='8'/><line x1='50' y1='10' x2='50' y2='40' stroke='%23C8922A' stroke-width='4'/><line x1='50' y1='60' x2='50' y2='90' stroke='%23C8922A' stroke-width='4'/><line x1='10' y1='50' x2='40' y2='50' stroke='%23C8922A' stroke-width='4'/><line x1='60' y1='50' x2='90' y2='50' stroke='%23C8922A' stroke-width='4'/></svg>"/>
-        <style>{`*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}body{background:#07090B;color:#EDE8DF;font-family:'Inter','SF Pro Display',system-ui,sans-serif}@keyframes reticle{to{transform:translate(-50%,-50%) rotate(360deg)}}@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}@keyframes floatThumb{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}input[type=range]{-webkit-appearance:none;height:4px;background:${C.s4};border-radius:2px;outline:none}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:${C.gold};cursor:pointer;box-shadow:0 0 6px ${C.goldGlow}}input:focus{outline:none;border-color:#C8922A70!important;box-shadow:0 0 0 3px #C8922A12}button:hover:not(:disabled){opacity:.86;transition:opacity .15s}.ch{transition:border-color .2s,box-shadow .2s}.ch:hover{border-color:#C8922A40!important;box-shadow:0 0 24px #C8922A14}::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#1C1F24;border-radius:2px}`}</style>
+        <style>{`*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}body{background:#07090B;color:#EDE8DF;font-family:'Inter','SF Pro Display',system-ui,sans-serif}@keyframes reticle{to{transform:translate(-50%,-50%) rotate(360deg)}}@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}@keyframes floatThumb{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}input[type=range]{-webkit-appearance:none;height:4px;background:${C.s4};border-radius:2px;outline:none}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:${C.gold};cursor:pointer;box-shadow:0 0 6px ${C.goldGlow}}input:focus{outline:none;border-color:#C8922A70!important;box-shadow:0 0 0 3px #C8922A12}button:hover:not(:disabled){opacity:.86;transition:opacity .15s}.ch{transition:border-color .2s,box-shadow .2s}.ch:hover{border-color:#C8922A40!important;box-shadow:0 0 24px #C8922A14}::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#1C1F24;border-radius:2px}@media(max-width:768px){  .hide-mobile{display:none!important}  .full-mobile{width:100%!important;min-width:0!important}  .stack-mobile{flex-direction:column!important}  .pad-mobile{padding:48px 16px!important}  .pad-sm-mobile{padding:24px 16px!important}}`}</style>
       </Head>
       <div style={{minHeight:'100vh',backgroundColor:C.bg}}>
 
@@ -752,14 +782,14 @@ export default function Home(){
         <div style={{position:'relative',overflow:'hidden',borderBottom:`1px solid ${C.border}`}}>
           <div style={{position:'absolute',inset:0,backgroundImage:`linear-gradient(${C.gold}07 1px,transparent 1px),linear-gradient(90deg,${C.gold}07 1px,transparent 1px)`,backgroundSize:'44px 44px',pointerEvents:'none'}}/>
           <div style={{position:'absolute',inset:0,background:`radial-gradient(ellipse 80% 70% at 15% 50%,#0F1A1280,transparent),radial-gradient(ellipse 60% 50% at 50% 0%,${C.gold}10,transparent)`,pointerEvents:'none'}}/>
-          {HERO_THUMBS.map((t,i)=><FloatingThumb key={i} {...t}/>)}
+          {!isMobile&&HERO_THUMBS.map((t,i)=><FloatingThumb key={i} {...t}/>)}
           <svg width={540} height={540} viewBox="0 0 200 200" style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',opacity:0.04,pointerEvents:'none',animation:'reticle 90s linear infinite'}}>
             {[90,62,34].map(r=><circle key={r} cx="100" cy="100" r={r} fill="none" stroke={C.gold} strokeWidth={r===90?'0.5':'0.3'}/>)}
             <circle cx="100" cy="100" r="3.5" fill="none" stroke={C.gold} strokeWidth="1"/>
             {[['100','10','100','68'],['100','132','100','190'],['10','100','68','100'],['132','100','190','100']].map(([x1,y1,x2,y2],i)=><line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={C.gold} strokeWidth="0.5"/>)}
           </svg>
 
-          <div ref={heroRef} style={{maxWidth:900,margin:'0 auto',padding:'100px 24px 80px',textAlign:'center',position:'relative',zIndex:1,...anim(heroV)}}>
+          <div ref={heroRef} style={{maxWidth:900,margin:'0 auto',padding:isMobile?'60px 20px 48px':'100px 24px 80px',textAlign:'center',position:'relative',zIndex:1,...anim(heroV)}}>
             <div style={{display:'inline-flex',alignItems:'center',gap:8,fontSize:11,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.gold,backgroundColor:C.goldDim,border:`1px solid ${C.goldBorder}`,padding:'6px 14px',borderRadius:4,marginBottom:30}}>
               <Dot color={C.green} size={6} pulse/>
               {count} outdoor creators on the early access list
@@ -770,7 +800,7 @@ export default function Home(){
             <p style={{fontSize:18,color:C.muted,lineHeight:1.7,maxWidth:590,margin:'0 auto 44px'}}>
               TubeLab makes you browse 5M videos yourself. VidIQ gives 20M creators the same idea cards. <strong style={{color:C.text,fontWeight:700}}>DownRange Intel</strong> delivers your specific brief — with a ready-to-read script, thumbnail blueprint, 4-week calendar, and Shorts ideas — every Monday at 7am. Built for deer hunters, bowhunters, CCW instructors, waterfowl hunters, and every outdoor creator in between.
             </p>
-            <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:40}}>
+            <div style={{display:'flex',flexDirection:isMobile?'column':'row',alignItems:'center',gap:12,justifyContent:'center',marginBottom:40}}>
               <button style={btnP} onClick={()=>demoRef.current?.scrollIntoView({behavior:'smooth'})}>See Monday Brief Live →</button>
               <button style={btnG} onClick={()=>document.getElementById('access')?.scrollIntoView({behavior:'smooth'})}>Request Early Access</button>
             </div>
@@ -800,7 +830,7 @@ export default function Home(){
         </div>
 
         {/* PROBLEM */}
-        <div ref={probRef} style={{padding:'80px 24px',borderBottom:`1px solid ${C.border}`}}>
+        <div ref={probRef} style={{padding:isMobile?'48px 16px':'80px 24px',borderBottom:`1px solid ${C.border}`}}>
           <div style={{maxWidth:920,margin:'0 auto'}}>
             <div style={{textAlign:'center',marginBottom:48,...anim(probV)}}>
               <div style={{fontSize:13,fontWeight:800,color:C.gold,letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:14}}>The Problem</div>
@@ -820,13 +850,13 @@ export default function Home(){
         </div>
 
         {/* HOW IT WORKS */}
-        <div style={{backgroundColor:C.s1,padding:'80px 24px',borderBottom:`1px solid ${C.border}`}}>
+        <div style={{backgroundColor:C.s1,padding:isMobile?'48px 16px':'80px 24px',borderBottom:`1px solid ${C.border}`}}>
           <div style={{maxWidth:820,margin:'0 auto',textAlign:'center'}}>
             <div style={{fontSize:10,fontWeight:700,color:C.gold,letterSpacing:'0.14em',textTransform:'uppercase',marginBottom:14}}>How It Works</div>
             <h2 style={{fontSize:'clamp(26px,3.8vw,42px)',fontWeight:900,letterSpacing:'-1.2px',marginBottom:48}}>Three steps. Zero effort on your end.</h2>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:0}}>
+            <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(3,1fr)',gap:isMobile?0:0}}>
               {[['01','🔒','Set your niche','Tell us your focus. 30 seconds.'],['02','🔭','We scan weekly','We monitor 10+ channels, detect outliers, extract patterns.'],['03','📬','Monday at 7am','13 sections in your inbox. Script hook, thumbnail blueprint, 4-week calendar, Shorts, competitor pulse, title variants, upload checklist, repurposing, and monetization angle. Done.']].map(([n,icon,title,desc],i,a)=>(
-                <div key={n} style={{padding:'28px',borderRight:i<a.length-1?`1px solid ${C.border}`:'none'}}>
+                <div key={n} style={{padding:isMobile?'20px 0':'28px',borderRight:isMobile?'none':i<a.length-1?`1px solid ${C.border}`:'none',borderBottom:isMobile&&i<a.length-1?`1px solid ${C.border}`:'none'}}>
                   <div style={{fontSize:48,fontWeight:900,color:C.goldDim,letterSpacing:'-3px',lineHeight:1,marginBottom:14}}>{n}</div>
                   <div style={{fontSize:24,marginBottom:12}}>{icon}</div>
                   <div style={{fontSize:15,fontWeight:700,color:C.text,marginBottom:10}}>{title}</div>
@@ -838,7 +868,7 @@ export default function Home(){
         </div>
 
         {/* DEMO */}
-        <div ref={demoRef} id="demo" style={{padding:'80px 24px',borderBottom:`1px solid ${C.border}`}}>
+        <div ref={demoRef} id="demo" style={{padding:isMobile?'48px 16px':'80px 24px',borderBottom:`1px solid ${C.border}`}}>
           <div style={{maxWidth:720,margin:'0 auto'}}>
             <div style={{textAlign:'center',marginBottom:36}}>
               <div style={{fontSize:10,fontWeight:700,color:C.gold,letterSpacing:'0.14em',textTransform:'uppercase',marginBottom:14}}>Live Preview</div>
@@ -846,7 +876,7 @@ export default function Home(){
               <p style={{fontSize:15,color:C.muted,lineHeight:1.65,maxWidth:480,margin:'0 auto'}}>Click a niche below for an instant preview — pre-loaded briefs open in under a second. Or type any custom niche for a live AI-generated one.</p>
             </div>
             <div style={{backgroundColor:C.s1,border:`1px solid ${C.border}`,borderRadius:12,padding:'24px'}}>
-              <div style={{display:'flex',gap:10,marginBottom:14,flexWrap:'wrap'}}>
+              <div style={{display:'flex',flexDirection:isMobile?'column':'row',gap:10,marginBottom:14}}>
                 <input style={inp} placeholder="Custom niche — e.g. 'turkey hunting' or 'home defense'" value={niche} onChange={e=>setNiche(e.target.value)} onKeyDown={e=>e.key==='Enter'&&!loading&&runDemo()}/>
                 <button style={{...btnP,padding:'14px 20px',whiteSpace:'nowrap',opacity:loading||!niche.trim()?0.5:1}} onClick={()=>runDemo()} disabled={loading||!niche.trim()}>
                   {loading?'Loading...':'Generate Brief →'}
@@ -876,7 +906,7 @@ export default function Home(){
         </div>
 
         {/* ROI CALCULATOR */}
-        <div style={{backgroundColor:C.s1,padding:'80px 24px',borderBottom:`1px solid ${C.border}`}}>
+        <div style={{backgroundColor:C.s1,padding:isMobile?'48px 16px':'80px 24px',borderBottom:`1px solid ${C.border}`}}>
           <div style={{maxWidth:760,margin:'0 auto'}}>
             <div style={{textAlign:'center',marginBottom:36}}>
               <div style={{fontSize:10,fontWeight:700,color:C.gold,letterSpacing:'0.14em',textTransform:'uppercase',marginBottom:14}}>The Math</div>
@@ -891,14 +921,14 @@ export default function Home(){
         <ComparisonSection/>
 
         {/* SUITE */}
-        <div ref={suiteRef} id="suite" style={{padding:'80px 24px',borderBottom:`1px solid ${C.border}`}}>
+        <div ref={suiteRef} id="suite" style={{padding:isMobile?'48px 16px':'80px 24px',borderBottom:`1px solid ${C.border}`}}>
           <div style={{maxWidth:960,margin:'0 auto'}}>
             <div style={{textAlign:'center',marginBottom:44,...anim(suiteV)}}>
               <div style={{fontSize:10,fontWeight:700,color:C.gold,letterSpacing:'0.14em',textTransform:'uppercase',marginBottom:14}}>The Suite</div>
               <h2 style={{fontSize:'clamp(26px,3.8vw,42px)',fontWeight:900,letterSpacing:'-1.2px'}}>Everything you need. One niche.</h2>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gridTemplateRows:'auto auto',gap:14}}>
-              <div className="ch" style={{...anim(suiteV),gridColumn:'1',gridRow:'1/3',backgroundColor:C.s1,border:`1px solid ${C.goldBorder}`,borderRadius:12,padding:'28px 24px',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
+            <div style={{display:'grid',gridTemplateColumns:isMobile?'1fr':'repeat(3,1fr)',gridTemplateRows:isMobile?'auto':'auto auto',gap:14}}>
+              <div className="ch" style={{...anim(suiteV),gridColumn:isMobile?'auto':'1',gridRow:isMobile?'auto':'1/3',backgroundColor:C.s1,border:`1px solid ${C.goldBorder}`,borderRadius:12,padding:'28px 24px',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
                 <div style={{position:'absolute',top:0,right:0,backgroundColor:C.gold,color:'#000',fontSize:9,fontWeight:800,letterSpacing:'0.1em',padding:'4px 11px',borderRadius:'0 12px 0 8px'}}>FLAGSHIP</div>
                 <div style={{fontSize:32,marginBottom:16}}>📬</div>
                 <div style={{fontSize:18,fontWeight:800,color:C.text,marginBottom:4}}>Monday Brief</div>
@@ -931,7 +961,7 @@ export default function Home(){
         <PricingTabs onCTA={()=>document.getElementById('access')?.scrollIntoView({behavior:'smooth'})}/>
 
         {/* FAQ */}
-        <div ref={faqRef} style={{padding:'80px 24px',borderBottom:`1px solid ${C.border}`}} id="faq">
+        <div ref={faqRef} style={{padding:isMobile?'48px 16px':'80px 24px',borderBottom:`1px solid ${C.border}`}} id="faq">
           <div style={{maxWidth:680,margin:'0 auto'}}>
             <div style={{textAlign:'center',marginBottom:44,...anim(faqV)}}>
               <div style={{fontSize:10,fontWeight:700,color:C.gold,letterSpacing:'0.14em',textTransform:'uppercase',marginBottom:14}}>FAQ</div>
@@ -944,7 +974,7 @@ export default function Home(){
         </div>
 
         {/* CTA */}
-        <div id="access" style={{backgroundColor:C.s1,padding:'88px 24px',borderBottom:`1px solid ${C.border}`,position:'relative',overflow:'hidden'}}>
+        <div id="access" style={{backgroundColor:C.s1,padding:isMobile?'56px 16px':'88px 24px',borderBottom:`1px solid ${C.border}`,position:'relative',overflow:'hidden'}}>
           <div style={{position:'absolute',inset:0,background:`radial-gradient(ellipse 70% 60% at 50% 100%,${C.gold}12,transparent)`,pointerEvents:'none'}}/>
           <div style={{maxWidth:580,margin:'0 auto',textAlign:'center',position:'relative',zIndex:1}}>
             <div style={{display:'inline-flex',alignItems:'center',gap:8,fontSize:11,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.gold,backgroundColor:C.goldDim,border:`1px solid ${C.goldBorder}`,padding:'6px 14px',borderRadius:4,marginBottom:24}}>
@@ -956,7 +986,7 @@ export default function Home(){
             </p>
             {!joined?(
               <>
-                <div style={{display:'flex',gap:10,maxWidth:440,margin:'0 auto',flexWrap:'wrap',justifyContent:'center'}}>
+                <div style={{display:'flex',flexDirection:isMobile?'column':'row',gap:10,maxWidth:440,margin:'0 auto',justifyContent:'center'}}>
                   <input style={inp} type="email" placeholder="your@email.com" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&getAccess()}/>
                   <button style={btnP} onClick={getAccess}>Request Access →</button>
                 </div>
@@ -971,7 +1001,7 @@ export default function Home(){
           </div>
         </div>
 
-        <footer style={{padding:'32px 36px',borderTop:`1px solid ${C.border}`,display:'flex',flexDirection:'column',alignItems:'center',gap:16}}>
+        <footer style={{padding:isMobile?'28px 16px':'32px 36px',borderTop:`1px solid ${C.border}`,display:'flex',flexDirection:'column',alignItems:'center',gap:16}}>
           {/* Logo top */}
           <img src='/logo-sm.png' alt='DownRange Co. Intelligence Data' style={{height:32,width:'auto',opacity:0.9}}/>
           {/* Copyright middle */}
